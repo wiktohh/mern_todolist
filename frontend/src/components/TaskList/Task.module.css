@@ -1,0 +1,32 @@
+.task {
+  height: 100%;
+  border: black 2px solid;
+  font-size: 32px;
+  padding: 2rem 1rem 1rem;
+  margin: 1rem 0;
+  text-transform: uppercase;
+}
+.buttons {
+  width: 50%;
+  margin: auto;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-evenly;
+}
+.buttons button {
+  font-size: 20px;
+  background-color: red;
+  border: 0;
+  outline: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.buttons button:hover {
+  background-color: brown;
+}
+.input {
+  font-size: 29px;
+  text-transform: uppercase;
+  width: 90%;
+}

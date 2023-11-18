@@ -1,0 +1,22 @@
+.header {
+  width: 100vw;
+  height: 8vh;
+  background-color: red;
+  color: white;
+  font-size: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.authSection {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+}
+
+button {
+  margin: auto;
+  background-color: brown;
+  margin-right: 0.5rem;
+  margin-left: 1rem;
+}

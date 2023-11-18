@@ -1,0 +1,9 @@
+.errorHandler {
+  background-color: lightcoral;
+  border: 2px solid red;
+  padding: 1rem;
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  text-align: center;
+}
