@@ -19,7 +19,7 @@ const loginUser = async (req, res, next) => {
       { username: user.username, name: user.name },
       "secret-key"
     );
-    res.json({ name: user.name, username: user.username, token });
+    res.json(token);
   } catch (error) {
     return next(error);
   }
@@ -45,10 +45,15 @@ const createUser = async (req, res, next) => {
       { username: newUser.username, name: newUser.name },
       "secret-key"
     );
-    res.json({ name: newUser.name, username: newUser.username, token });
+    res.json(token);
   } catch (error) {
     return error;
   }
 };
 
-module.exports = { loginUser, createUser };
+const getUser = async (req, res, next) => {
+  const user = req.userData;
+  res.json(user);
+};
+
+module.exports = { loginUser, createUser, getUser };

@@ -6,19 +6,19 @@ import TaskList from "./components/TaskList/TaskList";
 import { useAuth } from "./context/auth-context";
 
 function App() {
-  const { isLoggedIn } = useAuth();
+  const { token } = useAuth();
 
   return (
     <>
       <Header />
       <Switch>
         <Route path="/" exact>
-          {isLoggedIn ? <Redirect to="/tasks" /> : <Login />}
+          {token ? <Redirect to="/tasks" /> : <Login />}
         </Route>
         <Route path="/register" exact>
-          {isLoggedIn ? <Redirect to="/tasks" /> : <Register />}
+          {token ? <Redirect to="/tasks" /> : <Register />}
         </Route>
-        {isLoggedIn ? (
+        {token ? (
           <Route path="/tasks" exact component={TaskList} />
         ) : (
           <Redirect to="/" />

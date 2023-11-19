@@ -17,7 +17,7 @@ const getTaskByCreator = async (req, res, next) => {
   res.json(tasks);
 };
 
-const createTask = async (req, res) => {
+const createTask = async (req, res, next) => {
   const { content, creator } = req.body;
   try {
     const newTask = new Task({

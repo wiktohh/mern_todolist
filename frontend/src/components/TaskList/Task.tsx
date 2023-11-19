@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./Task.module.css";
 import { Card, TextField, Button } from "@mui/material";
 import { useAuth } from "../../context/auth-context";
@@ -23,12 +23,7 @@ const Task = ({ content, id, getTasks }: ITask) => {
     setIsEditMode((prevState) => !prevState);
   };
 
-  useEffect(() => {
-    console.log(error);
-  });
-
   const editTask = async () => {
-    console.log(error);
     try {
       const response = await fetch(`http://localhost:3000/task/task/${id}`, {
         method: "PATCH",
@@ -42,7 +37,6 @@ const Task = ({ content, id, getTasks }: ITask) => {
       });
       if (!response.ok) {
         const data = await response.json();
-        console.log(data.message);
         setError(data.message);
       } else {
         setError("");

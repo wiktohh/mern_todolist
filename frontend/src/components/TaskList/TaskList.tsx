@@ -30,7 +30,6 @@ const TaskList = () => {
       }
     );
     const data = await response.json();
-    console.log(data);
     setTasks(data);
     setIsLoading(false);
   };

@@ -16,13 +16,11 @@ interface IRegisterData {
 interface IAuthContext {
   error: string;
   user: IUser | null;
-  isLoggedIn: boolean;
   token: string;
   login: (loginData: ILoginData) => void;
   logout: () => void;
   register: (registerData: IRegisterData) => void;
   resetError: () => void;
-  setUserLoggedIn: () => void;
 }
 
 type AuthContextProviderProps = {
@@ -32,13 +30,11 @@ type AuthContextProviderProps = {
 const AuthContext = createContext<IAuthContext>({
   user: null,
   error: "",
-  isLoggedIn: false,
   token: "",
   logout: () => {},
   login: () => {},
   register: () => {},
   resetError: () => {},
-  setUserLoggedIn: () => {},
 });
 
 interface ILoginData {
@@ -58,7 +54,6 @@ export const useAuth = () => {
 };
 
 export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<IUser | null>(null);
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
@@ -66,99 +61,102 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   const history = useHistory();
 
-  const setUserLoggedIn = () => {
-    setIsLoggedIn(true);
+  const getUser = async (token: string) => {
+    const response = await fetch("http://localhost:3000/auth/getUser", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setUser(data);
   };
 
   useEffect(() => {
-    const storedLoggedInStatus =
-      localStorage.getItem("isLoggedIn") === "logged";
-    if (storedLoggedInStatus) {
+    const fetchData = async () => {
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
         setToken(storedToken);
-      }
 
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        await getUser(storedToken);
+        setLoading(false);
+      } else {
+        setLoading(false);
       }
-      setIsLoggedIn(true);
-    }
-    setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
-  const login = (loginData: ILoginData) => {
-    fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(loginData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((errorData) => {
-            throw new Error(errorData.message);
-          });
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setUser(data);
-        setIsLoggedIn(true);
-        setToken(data.token);
-        history.push("/tasks");
-        localStorage.setItem("isLoggedIn", "logged");
-        localStorage.setItem("user", JSON.stringify(data));
-        localStorage.setItem("token", data.token);
-      })
-      .catch((error) => {
-        console.log(error.message);
-        setError(error.message);
+  const login = async (loginData: ILoginData) => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginData),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+
+      const data = await response.json();
+      localStorage.setItem("token", data);
+      setToken(() => data);
+      await getUser(data);
+      history.push("/tasks");
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+    setLoading(false);
   };
 
   const logout = () => {
-    setIsLoggedIn(false);
     setUser(null);
-    setToken("");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("user");
+    setToken(() => "");
+    localStorage.removeItem("token");
   };
 
   const resetError = () => {
     setError("");
   };
 
-  const register = (registerData: IRegisterData) => {
-    fetch("http://localhost:3000/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(registerData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((errorData) => {
-            throw new Error(errorData.message);
-          });
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setUser(data);
-        setIsLoggedIn(true);
-        setToken(data.token);
-        history.push("/tasks");
-        localStorage.setItem("isLoggedIn", "logged");
-        localStorage.setItem("user", JSON.stringify(data));
-        localStorage.setItem("token", data.token);
-      })
-      .catch((error) => {
-        setError(error.message);
+  const register = async (registerData: IRegisterData) => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registerData),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+
+      const data = await response.json();
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      await getUser(data);
+      history.push("/tasks");
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+    setLoading(false);
   };
 
   const values = {
@@ -166,13 +164,10 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     login,
     logout,
     register,
-    isLoggedIn,
     error,
     resetError,
-    setUserLoggedIn,
     token,
   };
-  console.log(values);
   return (
     !loading && (
       <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
