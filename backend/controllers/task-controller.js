@@ -1,13 +1,14 @@
 const DUMMY_TASKS = ["wyjsc z psem", "posprzatac pokoj"];
 const Task = require("../models/task-schema");
 const mongoose = require("mongoose");
+const ErrorHandler = require("../models/error-handler");
 
 const getAllTasks = async (req, res) => {
   const allTasks = await Task.find();
   res.json({ allTasks });
 };
 
-const getTaskByCreator = async (req, res) => {
+const getTaskByCreator = async (req, res, next) => {
   const { creator } = req.params;
   const tasks = await Task.find({
     creator: { $regex: new RegExp(creator, "i") },
@@ -26,37 +27,34 @@ const createTask = async (req, res) => {
 
     const savedTask = await newTask.save();
     res.json({ message: "Utworzono" });
-  } catch (err) {
-    console.error(err.message);
+  } catch (error) {
+    next(error);
   }
 };
 
-const removeTask = async (req, res) => {
+const removeTask = async (req, res, next) => {
   const { id } = req.params;
   try {
     const deletedTask = await Task.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
     if (!deletedTask) {
-      return res.status(404).json({ message: new mongoose.Types.ObjectId(id) });
+      return next(new ErrorHandler("Nie znaleziono zadania do usuniecia", 404));
     }
     await deletedTask.deleteOne();
 
     res.json({ message: "Usunięto" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ id, message: "Blad serwera" });
+    next(error);
   }
 };
 
-const updateTask = async (req, res) => {
+const updateTask = async (req, res, next) => {
   const { id } = req.params;
   const { newValue } = req.body;
   try {
     if (!newValue) {
-      return res
-        .status(400)
-        .json({ message: "Nie podano nowej wartości zadania" });
+      return next(new ErrorHandler("Proszę wpisać wartość zadania", 404));
     }
 
     const task = await Task.findOne({
@@ -64,15 +62,16 @@ const updateTask = async (req, res) => {
     });
 
     if (!task) {
-      return res.status(404).json({ message: "Nie znaleziono zadania" });
+      return next(
+        new ErrorHandler("Nie znaleziono zadania do aktualizacji", 404)
+      );
     }
 
     task.content = newValue;
     await task.save();
     res.json({ message: "Edytowano" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ id, message: "Błąd serwera" });
+    return next(error);
   }
 };
 

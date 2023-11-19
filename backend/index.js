@@ -12,6 +12,15 @@ app.use(cors());
 app.use("/task", taskRoutes);
 app.use("/auth", userRoutes);
 
+app.use((error, req, res, next) => {
+  if (res.headerSent) {
+    return next(error);
+  }
+  res
+    .status(error.code || 500)
+    .json({ message: error.message || "Błąd serwera" });
+});
+
 mongoose
   .connect("mongodb://localhost:27017")
   .then(app.listen(3000, () => console.log("dziala")))
