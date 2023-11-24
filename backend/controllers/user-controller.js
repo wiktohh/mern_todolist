@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user-schema");
 const ErrorHandler = require("../models/error-handler");
 
+require("dotenv").config();
+
 const loginUser = async (req, res, next) => {
   const { username, password } = req.body;
   try {
@@ -17,7 +19,7 @@ const loginUser = async (req, res, next) => {
     }
     const token = jwt.sign(
       { username: user.username, name: user.name },
-      "secret-key"
+      process.env.SECRET_KEY
     );
     res.json(token);
   } catch (error) {
@@ -43,7 +45,7 @@ const createUser = async (req, res, next) => {
     await newUser.save();
     const token = jwt.sign(
       { username: newUser.username, name: newUser.name },
-      "secret-key"
+      process.env.SECRET_KEY
     );
     res.json(token);
   } catch (error) {

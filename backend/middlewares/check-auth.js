@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 module.exports = (req, res, next) => {
   if (req.method === "OPTIONS") {
@@ -9,7 +10,7 @@ module.exports = (req, res, next) => {
     if (!token) {
       throw new Error("Brak auth");
     }
-    const decodedToken = jwt.verify(token, "secret-key");
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
     req.userData = { username: decodedToken.username, name: decodedToken.name };
     next();
   } catch (err) {

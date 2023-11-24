@@ -2,6 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
+require("dotenv").config();
+
 const taskRoutes = require("./routes/task-routes");
 const userRoutes = require("./routes/user-routes");
 const app = express();
@@ -22,6 +25,6 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-  .connect("mongodb://localhost:27017")
-  .then(app.listen(3000, () => console.log("dziala")))
+  .connect(process.env.MONGODB_URL)
+  .then(app.listen(process.env.PORT, () => console.log("it works")))
   .catch((err) => console.log(err));
